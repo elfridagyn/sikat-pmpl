@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIKAT UB - Sistem Informasi Kelola Aset</title>
+    <title>SIKAT - Sistem Informasi Kelola Aset</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,6 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Update menggunakan bggg.png atau bggg.jpg sesuai kebutuhan file public kamu */
             background-image: url("{{ asset('images/bggg.png') }}");
             background-size: cover;
             background-position: center;
@@ -22,7 +21,6 @@
             background-attachment: fixed;
         }
 
-        /* Custom scrollbar halus untuk menu sidebar */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
@@ -38,16 +36,16 @@
 
     <div class="flex min-h-screen overflow-hidden">
 
-        {{-- SIDEBAR: Glassmorphism Mewah Bening --}}
+        {{-- SIDEBAR --}}
         <aside class="w-64 bg-white/40 backdrop-blur-xl border-r border-white/20 flex-shrink-0 flex flex-col h-screen sticky top-0 z-50 justify-between py-6 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
 
             <div>
-                {{-- BRAND LOGO AREA: Ukuran logo proporsional --}}
+                {{-- BRAND LOGO AREA --}}
                 <div class="px-6 py-2 flex justify-center items-center">
                     <img src="{{ asset('images/logosikat.png') }}" class="h-16 w-auto object-contain transition-transform duration-300 hover:scale-105" alt="SIKAT Logo">
                 </div>
 
-                {{-- NAVIGASI UTAMA DENGAN HIGHLIGHT TEAL HALUS PERSIS GAMBAR MOCKUP --}}
+                {{-- NAVIGASI UTAMA --}}
                 <nav class="px-4 space-y-1 mt-8 overflow-y-auto custom-scrollbar">
 
                     {{-- Dashboard --}}
@@ -62,7 +60,6 @@
                         <span class="absolute right-0 top-1/4 w-1 h-5 bg-[#4E7281] rounded-l-md"></span>
                         @endif
                     </a>
-
 
                     {{-- Kategori --}}
                     <a href="/categories" class="group flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition duration-150 relative {{ Request::is('categories*') ? 'bg-[#4E7281]/15 text-[#4E7281] font-bold' : 'text-gray-600 hover:bg-white/30 hover:text-gray-900' }}">
@@ -90,8 +87,8 @@
                         @endif
                     </a>
 
-                    {{-- MENU KHUSUS ADMIN ASET --}}
-                    @if(auth()->check() && auth()->user()->role == 'admin_aset')
+                    {{-- MENU KEUANGAN: Terbuka untuk Admin Aset DAN Petugas Inventaris --}}
+                    @if(auth()->check() && (auth()->user()->role == 'admin_aset' || auth()->user()->role == 'petugas_inventaris'))
                     <a href="/asset-finances" class="group flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition duration-150 relative {{ Request::is('asset-finances*') ? 'bg-[#4E7281]/15 text-[#4E7281] font-bold' : 'text-gray-600 hover:bg-white/30 hover:text-gray-900' }}">
                         <div class="flex items-center gap-3">
                             <svg class="w-4 h-4 transition {{ Request::is('asset-finances*') ? 'text-[#4E7281]' : 'text-gray-500 group-hover:text-gray-700' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +100,10 @@
                         <span class="absolute right-0 top-1/4 w-1 h-5 bg-[#4E7281] rounded-l-md"></span>
                         @endif
                     </a>
+                    @endif
 
+                    {{-- MENU EXCLUSIVE HANYA ADMIN ASET: Manajemen User --}}
+                    @if(auth()->check() && auth()->user()->role == 'admin_aset')
                     <a href="{{ route('users.index') }}" class="group flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition duration-150 relative {{ Request::is('users*') ? 'bg-[#4E7281]/15 text-[#4E7281] font-bold' : 'text-gray-600 hover:bg-white/30 hover:text-gray-900' }}">
                         <div class="flex items-center gap-3">
                             <svg class="w-4 h-4 transition {{ Request::is('users*') ? 'text-[#4E7281]' : 'text-gray-500 group-hover:text-gray-700' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +136,6 @@
             @auth
             <div class="px-4">
                 <div x-data="{ open: false }" class="relative">
-                    {{-- Tombol Pemicu Dropdown --}}
                     <button @click="open = !open" class="w-full flex items-center gap-2.5 p-2.5 bg-white/50 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:bg-white/70 transition">
                         @if(auth()->user()->photo)
                         <img src="{{ asset('storage/' . auth()->user()->photo) }}" class="w-8 h-8 rounded-full object-cover border border-white shadow-2xs">
@@ -154,7 +153,6 @@
                         </svg>
                     </button>
 
-                    {{-- Dropdown Menu --}}
                     <div x-show="open"
                         @click.away="open = false"
                         x-transition:enter="transition ease-out duration-100"
@@ -166,7 +164,6 @@
                             Edit Profile
                         </a>
 
-                        {{-- Sesuaikan route reset password Anda --}}
                         <a href="{{ route('custom.password.reset') }}" class="block px-4 py-2 text-[11px] font-bold text-gray-700 hover:bg-[#4E7281]/10 hover:text-[#4E7281] transition">
                             Reset Password
                         </a>
@@ -198,163 +195,50 @@
 
                 {{-- Sisi Kanan Topbar --}}
                 <div class="flex items-center gap-3">
-                    {{-- Bell Notifikasi --}}
-                    {{-- NOTIFICATION --}}
                     <div x-data="{ notifOpen: false }" class="relative">
-
-                        {{-- BUTTON --}}
                         <button
                             @click="notifOpen = !notifOpen"
-                            class="p-2 text-gray-500 hover:text-gray-700
-               bg-white/60 border border-white/40
-               rounded-xl shadow-3xs hover:scale-105
-               transition relative">
-
-                            {{-- ICON --}}
-                            <svg class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24">
-
-                                <path stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-                                </path>
-
+                            class="p-2 text-gray-500 hover:text-gray-700 bg-white/60 border border-white/40 rounded-xl shadow-3xs hover:scale-105 transition relative">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                             </svg>
-
-                            {{-- RED DOT --}}
                             @if($notifications->count() > 0)
-
-                            <span class="absolute top-2 right-2
-                         w-1.5 h-1.5 bg-red-500
-                         rounded-full border border-white">
-                            </span>
-
+                            <span class="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border border-white"></span>
                             @endif
-
                         </button>
 
-                        {{-- DROPDOWN --}}
-                        <div
-                            x-show="notifOpen"
+                        <div x-show="notifOpen"
                             @click.away="notifOpen = false"
-
-                            class="absolute right-0 mt-3 w-96
-               bg-white/80 backdrop-blur-xl
-               border border-white/30
-               rounded-3xl shadow-2xl
-               overflow-hidden z-50">
-
-                            {{-- HEADER --}}
+                            class="absolute right-0 mt-3 w-96 bg-white/80 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl overflow-hidden z-50">
                             <div class="px-5 py-4 border-b">
-
-                                <h3 class="font-bold text-sm">
-                                    Notifications
-                                </h3>
-
+                                <h3 class="font-bold text-sm">Notifications</h3>
                             </div>
-
-                            {{-- LIST --}}
                             <div class="max-h-[400px] overflow-y-auto">
-
                                 @forelse($notifications as $notif)
-
-                                <div class="flex gap-4 px-5 py-4
-                            hover:bg-white/40
-                            transition border-b">
-
-                                    {{-- ICON --}}
-                                    <div class="w-10 h-10 rounded-2xl
-                                bg-[#4E7281]/10
-                                flex items-center justify-center">
-
-                                        <svg class="w-5 h-5 text-[#4E7281]"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24">
-
-                                            <path stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M13 16h-1v-4h-1m1-4h.01">
-                                            </path>
-
+                                <div class="flex gap-4 px-5 py-4 hover:bg-white/40 transition border-b">
+                                    <div class="w-10 h-10 rounded-2xl bg-[#4E7281]/10 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#4E7281]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"></path>
                                         </svg>
-
                                     </div>
-
-                                    {{-- CONTENT --}}
                                     <div class="flex-1">
-
-                                        <p class="text-sm font-semibold text-gray-800">
-
-                                            {{ $notif->aktivitas }}
-
-                                        </p>
-
-                                        <p class="text-xs text-gray-500 mt-1">
-
-                                            {{ $notif->keterangan }}
-
-                                        </p>
-
-                                        <p class="text-[10px] text-gray-400 mt-2">
-
-                                            {{ $notif->created_at->diffForHumans() }}
-
-                                        </p>
-
+                                        <p class="text-sm font-semibold text-gray-800">{{ $notif->aktivitas }}</p>
+                                        <p class="text-xs text-gray-500 mt-1">{{ $notif->keterangan }}</p>
+                                        <p class="text-[10px] text-gray-400 mt-2">{{ $notif->created_at->diffForHumans() }}</p>
                                     </div>
-
                                 </div>
-
                                 @empty
-
-                                <div class="p-6 text-center text-gray-400 text-sm">
-
-                                    Belum ada notifikasi
-
-                                </div>
-
+                                <div class="p-6 text-center text-gray-400 text-sm">Belum ada notifikasi</div>
                                 @endforelse
-
                             </div>
-
                         </div>
-
                     </div>
 
                     {{-- HELP BUTTON --}}
-                    <a href="{{ route('help') }}"
-                        class="p-2 text-gray-500
-          hover:text-gray-700
-          bg-white/60
-          border border-white/40
-          rounded-xl
-          shadow-3xs
-          hover:scale-105
-          transition">
-
-                        <svg class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-
-                            <path stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2
-                 2.21 0 4 1.343 4 3
-                 0 1.4-1.278 2.575-3.006 2.907
-                 -.542.104-.994.54-.994 1.093m0 3h.01
-                 M21 12a9 9 0 11-18 0
-                 9 9 0 0118 0z">
-                            </path>
-
+                    <a href="{{ route('help') }}" class="p-2 text-gray-500 hover:text-gray-700 bg-white/60 border border-white/40 rounded-xl shadow-3xs hover:scale-105 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-
                     </a>
 
                     <span class="h-4 w-px bg-gray-300/60 mx-1"></span>
@@ -371,9 +255,7 @@
                         </button>
                     </form>
                     @else
-                    <a href="/login" class="px-4 py-1.5 bg-[#4E7281] text-white text-xs font-bold rounded-xl shadow-sm transition">
-                        Login
-                    </a>
+                    <a href="/login" class="px-4 py-1.5 bg-[#4E7281] text-white text-xs font-bold rounded-xl shadow-sm transition">Login</a>
                     @endauth
                 </div>
             </header>
@@ -387,15 +269,8 @@
             <footer class="px-8 py-5 text-[10px] font-medium text-gray-400 flex justify-between border-t border-white/10 bg-white/5">
                 <p>&copy; 2026 SIKAT | All rights reserved.</p>
                 <div class="flex gap-4 font-semibold text-gray-400/80">
-                    <a href="{{ route('privacy') }}"
-                        class="hover:text-[#4E7281] transition">
-                        Privacy Policy
-                    </a>
-
-                    <a href="{{ route('terms') }}"
-                        class="hover:text-[#4E7281] transition">
-                        Terms of Service
-                    </a>
+                    <a href="{{ route('privacy') }}" class="hover:text-[#4E7281] transition">Privacy Policy</a>
+                    <a href="{{ route('terms') }}" class="hover:text-[#4E7281] transition">Terms of Service</a>
                 </div>
             </footer>
         </div>
