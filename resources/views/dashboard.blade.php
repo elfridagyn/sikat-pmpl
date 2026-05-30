@@ -1,6 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- LOADING OVERLAY (Full Screen dengan Efek Glassmorphism) --}}
+<div id="loadingOverlay" class="hidden fixed inset-0 bg-gray-950/40 backdrop-blur-md flex justify-center items-center z-[9999]">
+    <div class="bg-white p-6 rounded-[24px] shadow-2xl flex flex-col items-center space-y-3 border border-gray-100">
+        {{-- SVG Spinner Animasi --}}
+        <svg class="animate-spin h-8 w-8 text-[#4e7281]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-xs font-semibold text-gray-700 tracking-tight">Loading page...</span>
+    </div>
+</div>
+
 <div class="space-y-6">
 
     {{-- HEADER UTAMA DASHBOARD & TOMBOL AKSIDALAM --}}
@@ -9,7 +21,7 @@
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
             <p class="text-xs text-gray-400 mt-0.5">Real-time tracking of asset distribution and status.</p>
         </div>
-        <a href="{{ route('assets.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-[#4e7281] hover:bg-[#3f5d6a] text-white rounded-xl text-xs font-semibold tracking-wide shadow-md shadow-[#4e7281]/10 transition duration-150 active:scale-95">
+        <a href="{{ route('assets.create') }}" class="load-trigger inline-flex items-center gap-2 px-4 py-2 bg-[#4e7281] hover:bg-[#3f5d6a] text-white rounded-xl text-xs font-semibold tracking-wide shadow-md shadow-[#4e7281]/10 transition duration-150 active:scale-95">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
             </svg>
@@ -128,7 +140,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-sm font-bold text-gray-900 tracking-tight">Recent Asset Flow</h2>
 
-                {{-- AMAN: Data dilempar lewat atribut HTML data-daily dan data-monthly --}}
+                {{-- DATA CONVERTED SAFELY TO HTML ATTRIBUTES --}}
                 <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-[10px] font-semibold text-gray-500"
                     id="flowToggleWrapper"
                     data-has-assets="{{ $totalAsset > 0 ? 'true' : 'false' }}"
@@ -183,7 +195,7 @@
     <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-sm font-bold text-gray-900 tracking-tight">Latest Asset Updates</h2>
-            <a href="#" class="text-xs font-semibold text-[#4e7281] hover:underline">View All</a>
+            <a href="#" class="load-trigger text-xs font-semibold text-[#4e7281] hover:underline">View All</a>
         </div>
 
         <div class="overflow-x-auto">
@@ -242,9 +254,24 @@
 
 </div>
 
-{{-- JAVASCRIPT MURNI (BEBAS ERROR VS CODE) --}}
+{{-- JAVASCRIPT --}}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // --- LOGIKA TRIGGER LOADING PAGE ---
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const triggers = document.querySelectorAll('.load-trigger');
+        
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                // Pastikan target href bukan tautan kosong atau berkarakter '#'
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    loadingOverlay.classList.remove('hidden');
+                }
+            });
+        });
+
+        // --- CHART JS MANAGEMENT ---
         if (typeof Chart === 'undefined') {
             console.error('Chart.js belum dimuat.');
             return;
@@ -257,7 +284,6 @@
         const btnDaily = document.getElementById('btnDaily');
         const btnMonthly = document.getElementById('btnMonthly');
 
-        // FIX AMAN: Mengambil data JSON dari element attribute HTML
         const dailyData = JSON.parse(toggleWrapper.getAttribute('data-daily')) || [0, 0, 0, 0, 0, 0, 0];
         const monthlyData = JSON.parse(toggleWrapper.getAttribute('data-monthly')) || new Array(12).fill(0);
 
@@ -289,38 +315,24 @@
                 },
                 scales: {
                     x: {
-                        grid: {
-                            display: false
-                        },
-                        border: {
-                            display: false
-                        },
+                        grid: { display: false },
+                        border: { display: false },
                         ticks: {
                             color: '#94a3b8',
-                            font: {
-                                size: 10
-                            }
+                            font: { size: 10 }
                         }
                     },
                     y: {
-                        grid: {
-                            color: '#f1f5f9'
-                        },
-                        border: {
-                            display: false
-                        },
+                        grid: { color: '#f1f5f9' },
+                        border: { display: false },
                         min: 0,
                         ticks: {
                             display: true,
                             color: '#94a3b8',
-                            font: {
-                                size: 10
-                            },
+                            font: { size: 10 },
                             maxTicksLimit: 5,
                             callback: function(value) {
-                                if (value % 1 === 0) {
-                                    return value;
-                                }
+                                if (value % 1 === 0) return value;
                             }
                         }
                     }
@@ -375,9 +387,7 @@
                     maintainAspectRatio: false,
                     cutout: '80%',
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     }
                 }
             });

@@ -1,11 +1,22 @@
 <x-guest-layout>
 
-    {{-- KARTU UTAMA: Efek kaca transparan (Glassmorphism) yang halus dan membulat pas --}}
+    {{-- LOADING OVERLAY (Full Screen dengan Efek Glassmorphism) --}}
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-gray-950/40 backdrop-blur-md flex justify-center items-center z-[9999]">
+        <div class="bg-white p-6 rounded-[24px] shadow-2xl flex flex-col items-center space-y-3 border border-gray-100">
+            {{-- SVG Spinner Animasi --}}
+            <svg class="animate-spin h-8 w-8 text-[#4e7281]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-xs font-semibold text-gray-700 tracking-tight">Logging into your account...</span>
+        </div>
+    </div>
+
+    {{-- KARTU UTAMA: Efek kaca transparan (Glassmorphism) --}}
     <div class="w-full max-w-[460px] mx-auto bg-white/40 backdrop-blur-3xl rounded-[35px] shadow-2xl p-10 border border-white/20">
 
         {{-- AREA LOGO & JUDUL --}}
         <div class="text-center mb-9">
-            {{-- Memanggil logo asli kamu --}}
             <img src="{{ asset('images/logosikat.png') }}" alt="SIKAT Logo" class="mx-auto h-20 w-auto mb-4">
             <h1 class="text-2xl font-bold text-gray-800 tracking-tight mb-1">Login to Account</h1>
             <p class="text-gray-500 text-xs font-medium">Please enter your email and password to continue</p>
@@ -15,7 +26,7 @@
         <x-auth-session-status class="mb-4 text-xs" :status="session('status')" />
 
         {{-- FORM LOGIN --}}
-        <form method="POST" action="{{ route('login') }}" class="space-y-4">
+        <form method="POST" action="{{ route('login') }}" id="loginForm" class="space-y-4">
             @csrf
 
             {{-- INPUT EMAIL --}}
@@ -34,11 +45,9 @@
                     </a>
                 </div>
                 <div class="relative">
-                    {{-- 1. Tambahkan id="password" --}}
                     <input type="password" name="password" id="password" placeholder="••••••••" required
-                        class="w-full px-4 py-3 bg-[#f0f3f6]/80 border border-gray-200/50 rounded-xl text-gray-800 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4e7281]/30 focus:border-[#4e7281] transition duration-150 tracking-widest">
+                        class="w-full pl-4 pr-11 py-3 bg-[#f0f3f6]/80 border border-gray-200/50 rounded-xl text-gray-800 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4e7281]/30 focus:border-[#4e7281] transition duration-150 tracking-widest">
 
-                    {{-- 2. Tambahkan id="togglePassword" pada tombol pembungkus ikon --}}
                     <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 cursor-pointer hover:text-gray-600 focus:outline-none">
                         {{-- Ikon Mata Coret (Sembunyi) --}}
                         <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,34 +56,6 @@
                     </button>
                 </div>
             </div>
-
-            {{-- 3. LOGIKA JAVASCRIPT: Letakkan script ini di bagian bawah file sebelum penutup </x-guest-layout> --}}
-            <script>
-                const passwordInput = document.getElementById('password');
-                const togglePasswordButton = document.getElementById('togglePassword');
-                const eyeIcon = document.getElementById('eyeIcon');
-
-                // SVG path untuk Mata Terbuka (Intip)
-                const eyeOpenPath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
-
-                // SVG path untuk Mata Coret (Sembunyi) - bawaan awal
-                const eyeClosePath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;
-
-                togglePasswordButton.addEventListener('click', function() {
-                    // Cek tipe input sekarang
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
-
-                    // Ubah bentuk ikon SVG dan hilangkan tracking-widest kalau lagi jadi text biasa
-                    if (type === 'text') {
-                        eyeIcon.innerHTML = eyeOpenPath;
-                        passwordInput.classList.remove('tracking-widest');
-                    } else {
-                        eyeIcon.innerHTML = eyeClosePath;
-                        passwordInput.classList.add('tracking-widest');
-                    }
-                });
-            </script>
 
             {{-- REMEMBER ME --}}
             <div class="flex items-center space-x-2 pt-1">
@@ -85,7 +66,7 @@
                 </label>
             </div>
 
-            {{-- TOMBOL LOG IN (Warna & Ukuran Di-presisikan) --}}
+            {{-- TOMBOL LOG IN --}}
             <div class="pt-3">
                 <button type="submit"
                     class="w-full py-2.5 bg-[#4e7281] hover:bg-[#3f5d6a] text-white rounded-xl text-xs font-semibold tracking-wide shadow-md shadow-[#4e7281]/10 transition duration-150 active:scale-[0.98]">
@@ -103,5 +84,38 @@
         </div>
 
     </div>
+
+    {{-- LOGIKA JAVASCRIPT --}}
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const passwordInput = document.getElementById('password');
+        const togglePasswordButton = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        // 1. Logika Trigger Loading Halaman
+        loginForm.addEventListener('submit', function(e) {
+            if (loginForm.checkValidity()) {
+                loadingOverlay.classList.remove('hidden');
+            }
+        });
+
+        // 2. Logika Mata Intip Password
+        const eyeOpenPath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+        const eyeClosePath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;
+
+        togglePasswordButton.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            if (type === 'text') {
+                eyeIcon.innerHTML = eyeOpenPath;
+                passwordInput.classList.remove('tracking-widest');
+            } else {
+                eyeIcon.innerHTML = eyeClosePath;
+                passwordInput.classList.add('tracking-widest');
+            }
+        });
+    </script>
 
 </x-guest-layout>
