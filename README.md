@@ -8,14 +8,6 @@
   Sistem Informasi Kelola Aset Terpadu
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Laravel-12-red" alt="Laravel">
-  <img src="https://img.shields.io/badge/PHP-8.2-blue" alt="PHP">
-  <img src="https://img.shields.io/badge/MySQL-Database-orange" alt="MySQL">
-  <img src="https://img.shields.io/badge/TailwindCSS-UI-38BDF8" alt="TailwindCSS">
-  <img src="https://img.shields.io/badge/Status-Development-success" alt="Status">
-</p>
-
 ---
 
 ## Tentang SIKAT
