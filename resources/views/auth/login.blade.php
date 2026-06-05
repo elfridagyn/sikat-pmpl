@@ -24,7 +24,39 @@
 
         {{-- STATUS SESI (ALERT ERROR/SUKSES) --}}
         <x-auth-session-status class="mb-4 text-xs" :status="session('status')" />
+        {{-- ALERT ERROR LOGIN --}}
+        @if ($errors->any())
+        <div id="loginError"
+            class="mb-4 p-4 rounded-2xl bg-red-50/90 border border-red-200 backdrop-blur-sm shadow-sm transition-all duration-500">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                </svg>
 
+                <div>
+                    <p class="text-xs font-semibold text-red-700">
+                        Login Failed
+                    </p>
+                    <p class="text-[11px] text-red-600">
+                        Email atau password yang Anda masukkan salah.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            setTimeout(() => {
+                const alert = document.getElementById('loginError');
+                if (alert) {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-10px)';
+                    setTimeout(() => alert.remove(), 500);
+                }
+            }, 5000);
+        </script>
+        @endif
         {{-- FORM LOGIN --}}
         <form method="POST" action="{{ route('login') }}" id="loginForm" class="space-y-4">
             @csrf
