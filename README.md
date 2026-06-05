@@ -1,13 +1,6 @@
 <p align="center">
   <img src="docs/logosikat.png" width="200" alt="SIKAT Logo">
 </p>
-
-<h1 align="center">SIKAT</h1>
-
-<p align="center">
-  Sistem Informasi Kelola Aset Terpadu
-</p>
-
 ---
 
 ## Tentang SIKAT
